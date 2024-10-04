@@ -1,15 +1,24 @@
 # server/models.py
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, event
+from sqlalchemy.engine import Engine
+from sqlite3 import Connection
 
 metadata = MetaData(
     naming_convention={
         "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
-    }
-)
+    })
 
 db = SQLAlchemy(metadata=metadata)
+
+
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    if isinstance(dbapi_connection, Connection):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
 
 
 class Employee(db.Model):
@@ -40,6 +49,8 @@ class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     year = db.Column(db.Integer)
     summary = db.Column(db.String)
+
+    employee_id = db.Column(db.Integer, db.ForeignKey('employees.id'))
 
     def __repr__(self):
         return f"<Review {self.id}, {self.year}, {self.summary}>"
