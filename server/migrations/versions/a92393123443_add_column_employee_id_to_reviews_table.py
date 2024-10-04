@@ -1,4 +1,4 @@
-"""add column employee_id to review table
+"""add column employee_id to reviews table
 
 Revision ID: a92393123443
 Revises: 86cfe95e9496
